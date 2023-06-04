@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .input-container {
+      margin-bottom: 20px;
+    }
+
+    .input {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: lightgray;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .picker {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: lightgray;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .diary-container {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: lightgray;
+    }
+
+    .text {
+      font-size: 16px;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+
+    .todo-input-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .todo-input {
+      flex: 1;
+      margin-right: 10px;
+      padding: 10px;
+      background-color: lightgray;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .todo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 5px;
+    }
+
+    .todo-buttons {
+      display: flex;
+      margin-left: 10px;
+    }
+
+    .strikethrough {
+      text-decoration-line: line-through;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const diaries = [];
+      let diaryText = "";
+      let todoText = "";
+      let selectedMood = "";
+
+      function renderDiaries() {
+        const root = document.getElementById("root");
+        root.innerHTML = "";
+
+        const scrollView = document.createElement("div");
+        scrollView.className = "container";
+        scrollView.style.overflow = "auto";
+        root.appendChild(scrollView);
+
+        const inputContainer = document.createElement("div");
+        inputContainer.className = "input-container";
+        scrollView.appendChild(inputContainer);
+
+        const diaryInput = document.createElement("textarea");
+        diaryInput.className = "input";
+        diaryInput.value = diaryText;
+        diaryInput.placeholder = "Write your diary...";
+        diaryInput.rows = 4;
+        diaryInput.cols = 30;
+        diaryInput.addEventListener("input", function(event) {
+          diaryText = event.target.value;
+        });
+        inputContainer.appendChild(diaryInput);
+
+        const moodPicker = document.createElement("select");
+        moodPicker.className = "picker";
+        moodPicker.addEventListener("change", function(event) {
+          selectedMood = event.target.value;
+        });
+        const defaultOption = document.createElement("option");
+        defaultOption.text = "Select Mood";
+        defaultOption.value = "";
+        moodPicker.appendChild(defaultOption);
+        const happyOption = document.createElement("option");
+        happyOption.text = "Happy";
+        happyOption.value = "Happy";
+        moodPicker.appendChild(happyOption);
+        const sadOption = document.createElement("option");
+        sadOption.text = "Sad";
+        sadOption.value = "Sad";
+        moodPicker.appendChild(sadOption);
+        const excitedOption = document.createElement("option");
+        excitedOption.text = "Excited";
+        excitedOption.value = "Excited";
+        moodPicker.appendChild(excitedOption);
+        const angryOption = document.createElement("option");
+        angryOption.text = "Angry";
+        angryOption.value = "Angry";
+        moodPicker.appendChild(angryOption);
+        moodPicker.value = selectedMood;
+        inputContainer.appendChild(moodPicker);
+
+        const addDiaryButton = document.createElement("button");
+        addDiaryButton.textContent = "Add Diary";
+        addDiaryButton.addEventListener("click", function() {
+          if (diaryText !== "" && selectedMood !== "") {
+            const newDiary = {
+              diary: diaryText,
+              todos: [],
+              mood: selectedMood,
+              date: new Date().toLocaleDateString(),
+            };
+
+            diaries.push(newDiary);
+            diaryText = "";
+            selectedMood = "";
+            renderDiaries();
+          }
+        });
+        inputContainer.appendChild(addDiaryButton);
+
+        diaries.forEach(function(diary, index) {
+          const diaryContainer = document.createElement("div");
+          diaryContainer.className = "diary-container";
+          scrollView.appendChild(diaryContainer);
+
+          const diaryTextElement = document.createElement("p");
+          diaryTextElement.className = "text";
+          diaryTextElement.textContent = "Diary: " + diary.diary;
+          diaryContainer.appendChild(diaryTextElement);
+
+          const dateTextElement = document.createElement("p");
+          dateTextElement.className = "text";
+          dateTextElement.textContent = "Date: " + diary.date;
+          diaryContainer.appendChild(dateTextElement);
+
+          const moodTextElement = document.createElement("p");
+          moodTextElement.className = "text";
+          moodTextElement.textContent = "Mood: " + diary.mood;
+          diaryContainer.appendChild(moodTextElement);
+
+          diary.todos.forEach(function(todo, todoIndex) {
+            const todoContainer = document.createElement("div");
+            todoContainer.className = "todo-container";
+            diaryContainer.appendChild(todoContainer);
+
+            const todoTextElement = document.createElement("p");
+            todoTextElement.className = "text";
+            todoTextElement.textContent = "Todo: " + todo;
+            todoContainer.appendChild(todoTextElement);
+
+            const todoButtons = document.createElement("div");
+            todoButtons.className = "todo-buttons";
+            todoContainer.appendChild(todoButtons);
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.style.color = "red";
+            deleteButton.addEventListener("click", function() {
+              diaries[index].todos.splice(todoIndex, 1);
+              renderDiaries();
+            });
+            todoButtons.appendChild(deleteButton);
+
+            const confirmButton = document.createElement("button");
+            confirmButton.textContent = "Confirm";
+            confirmButton.addEventListener("click", function() {
+              diaries[index].todos[todoIndex] =
+                "✓ " + diaries[index].todos[todoIndex];
+              renderDiaries();
+            });
+            todoButtons.appendChild(confirmButton);
+          });
+        });
+
+        const todoInputContainer = document.createElement("div");
+        todoInputContainer.className = "todo-input-container";
+        scrollView.appendChild(todoInputContainer);
+
+        const todoInput = document.createElement("textarea");
+        todoInput.className = "todo-input";
+        todoInput.value = todoText;
+        todoInput.placeholder = "Add a todo...";
+        todoInput.rows = 4;
+        todoInput.cols = 30;
+        todoInput.addEventListener("input", function(event) {
+          todoText = event.target.value;
+        });
+        todoInputContainer.appendChild(todoInput);
+
+        const addTodoButton = document.createElement("button");
+        addTodoButton.textContent = "Add Todo";
+        addTodoButton.addEventListener("click", function() {
+          if (todoText !== "") {
+            const lastDiaryIndex = diaries.length - 1;
+            diaries[lastDiaryIndex].todos.push(todoText);
+            todoText = "";
+            renderDiaries();
+          }
+        });
+        todoInputContainer.appendChild(addTodoButton);
+      }
+
+      renderDiaries();
+    });
+  </script>
+</body>
+
+</html>
